@@ -21,7 +21,7 @@ export class App {
 
     this.isLoading = true;
     try {
-      const response = await fetch('http://localhost:3000/api/magic', {
+      const response = await fetch('https://ai-notes-sepia-nine.vercel.app//api/magic', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ dreams: this.dreams })
