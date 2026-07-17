@@ -4,8 +4,13 @@ const { OpenAI } = require('openai');
 require('dotenv').config()
 
 const app = express();
-app.use(cors({
-  origin: 'https://ai-notes-sepia-nine.vercel.app/'}));
+const corsOptions = {
+  origin: 'https://ai-notes-sepia-nine.vercel.app', // Убедись, что нет лишнего слеша в конце
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Инициализация OpenRouter
