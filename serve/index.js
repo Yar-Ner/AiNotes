@@ -16,7 +16,7 @@ app.use(express.json());
 // Инициализация OpenRouter
 const openai = new OpenAI({
   apiKey: process.env.OPENROUTER_API_KEY,
-  baseURL: process.env.LINK
+  baseURL: 'https://openrouter.ai/api/v1'
 });
 
 app.post('/api/magic', async (req, res) => {
