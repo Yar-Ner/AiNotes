@@ -45,7 +45,7 @@
       <ul>
         @if (neuro_dreams){
         @for (nedream of neuro_dreams; track nedream){
-          <li>{{nedream}}</li>
+          <li [innerHTML]="nedream | markdown"></li>
         }
       }@else{
         <li>Жду нажатия на кнопку!</li>
