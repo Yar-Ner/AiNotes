@@ -21,7 +21,7 @@ export class SafeHtmlPipe implements PipeTransform {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule, FormsModule],
+  imports: [RouterOutlet, CommonModule, FormsModule, SafeHtmlPipe],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
