@@ -2,6 +2,7 @@ import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { NgZone } from '@angular/core';
 
 @Component({
   selector: 'app-root',
@@ -15,7 +16,7 @@ export class App {
   dreams = ["Хочу покодить", "Надо сделать приложение о земле"];
   neuro_dreams: string[] = [];
   isLoading = false;
-
+  newDream: string = '';
   async onMagicClick() {
     if (this.dreams.length === 0) return;
 
@@ -37,15 +38,60 @@ export class App {
     }
   }
 
-  AddItem(inputElement: HTMLInputElement){
-    const text = inputElement.value.trim();
+  AddItem(dream: string) {
+  if (dream && dream.trim() !== '') {
+    this.dreams.push(dream); // Добавляем в список
+    this.newDream = '';      // Очищаем поле после отправки
+  }
+}
+// В компоненте
+recognition: any;
+constructor(private zone: NgZone) {}
+ngOnInit() {
+    // Используем проверку, чтобы код не падал, если API не поддерживается
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     
-    if (text) {
-      this.dreams.push(text);
-      inputElement.value = '';
+    if (SpeechRecognition) {
+      this.recognition = new SpeechRecognition();
+      this.recognition.lang = 'ru-RU';
+      this.recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+  this.zone.run(() => {
+    this.newDream = transcript; // Теперь Angular точно узнает об изменениях
+  });
+      };
+    } else {
+      console.warn('Ваш браузер не поддерживает распознавание речи');
     }
   }
 
+// Добавь переменную в класс
+isListening: boolean = false;
+
+startListening() {
+  if (this.isListening) {
+    // Если уже слушаем, можно либо просто выйти, либо остановить:
+    // this.recognition.stop(); 
+    return; 
+  }
+
+  if (this.recognition) {
+    this.isListening = true;
+    this.recognition.start();
+
+    // Когда распознавание завершилось, сбрасываем флаг
+    this.recognition.onend = () => {
+      this.isListening = false;
+    };
+  }
+}
+
+stopListening() {
+  if (this.recognition && this.isListening) {
+    this.recognition.stop();
+    this.isListening = false;
+  }
+}
   delItem(dream: any){
     this.dreams = this.dreams.filter(d => d !== dream);
   }
