@@ -2,7 +2,7 @@ import { Component, signal, OnInit, NgZone } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MarkdownPipe } from './safe-html.pipe'; // Укажи правильный путь
+import { MarkdownPipe } from './markdown.pipe'; // Укажи правильный путь
 
 @Component({
   selector: 'app-root',
