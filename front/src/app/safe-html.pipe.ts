@@ -1,14 +1,16 @@
 import { Pipe, PipeTransform } from '@angular/core';
+import { marked } from 'marked';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 @Pipe({
-  name: 'safeHtml',
+  name: 'markdown',
   standalone: true
 })
-export class SafeHtmlPipe implements PipeTransform {
+export class MarkdownPipe implements PipeTransform {
   constructor(private sanitizer: DomSanitizer) {}
 
   transform(value: string): SafeHtml {
-    return this.sanitizer.bypassSecurityTrustHtml(value);
+    if (!value) return '';
+    return this.sanitizer.bypassSecurityTrustHtml(marked.parse(value) as string);
   }
 }
