@@ -44,7 +44,7 @@ export class App implements OnInit {
   }
 
   // Методы управления
-  async onMagicClick() {
+async onMagicClick() {
     if (this.dreams.length === 0) return;
     this.isLoading = true;
     try {
@@ -54,7 +54,12 @@ export class App implements OnInit {
         body: JSON.stringify({ dreams: this.dreams })
       });
       const data = await response.json();
-      this.neuro_dreams = [data.result || 'Нет ответа'];
+      
+      // ДОБАВЛЕНА ЗАМЕНА для корректного отображения списков
+      const rawResult = data.result || 'Нет ответа';
+      const formattedResult = rawResult.replace(/- /g, '\n- '); 
+      
+      this.neuro_dreams = [formattedResult];
     } catch (error) {
       console.error('Ошибка ИИ:', error);
       this.neuro_dreams = ['Ошибка подключения к серверу'];
