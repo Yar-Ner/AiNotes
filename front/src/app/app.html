@@ -1,18 +1,31 @@
 <div class="container">
   <!-- ЛЕВАЯ КОЛОНКА -->
-  <div class="left">
+  <div class="left card"> <!-- Добавил card, чтобы был стиль карточки -->
     <h2>Ваши мысли</h2>
     <div class="dreams">
       <ul>
       @if (dreams){
         @for (dream of dreams; track dream){
-          <li>{{dream}}<button (click)="delItem(dream)">Удалить</button></li>
+          <li>
+            <span>{{dream}}</span> <!-- Обернул текст в span -->
+            <button class="btn btn-del" (click)="delItem(dream)">Удалить</button>
+          </li>
         }
       }
-      <li>
-        <button>Голос</button>
-        <input #dreamInput placeholder="Начните писать или говорить по кнопке справа...">
-        <button (click)="AddItem(dreamInput)">Отправить</button>
+      <li class="input-group"> <!-- Группа ввода для выравнивания -->
+<button 
+  class="btn btn-voice"  
+  (click)="isListening ? stopListening() : startListening()">
+  {{ isListening ? 'Остановить запись' : 'Голос' }}
+</button>
+<input [(ngModel)]="newDream" class="input-field" placeholder="Начните писать или говорите...">
+        <!-- Используем [disabled], чтобы кнопка не нажималась, если поле пустое -->
+        <button 
+  class="btn btn-send" 
+  (click)="AddItem(newDream)" 
+  [disabled]="!newDream">
+  Отправить
+</button>
       </li>
       </ul>
     </div>
@@ -26,9 +39,9 @@
   </div>
 
   <!-- ПРАВАЯ КОЛОНКА -->
-  <div class="right">
+  <div class="right card"> <!-- Добавил card -->
     <h2>Структурирование</h2>
-    <div class="dreams">
+    <div class="dreams ai-result"> <!-- Добавил класс для стилей ответа -->
       <ul>
         @if (neuro_dreams){
         @for (nedream of neuro_dreams; track nedream){
@@ -37,212 +50,96 @@
       }@else{
         <li>Жду нажатия на кнопку!</li>
       }
-        
       </ul>
     </div>
   </div>
 </div>
 
 <style>
-  /* --- Общие настройки контейнера --- */
-* {
-  box-sizing: border-box;
-}
+  /* 1. Базовые переменные и сброс */
+/* Базовый сброс */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background-color: #f4f7f6; font-family: sans-serif; padding: 20px; }
 
 .container {
-  display: flex;
-  width: 100%;
-  min-height: 85vh;
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  background-color: #f8f9fb;
-  color: #2b2d42;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+  align-items: start;
 }
 
-/* --- Колонки --- */
-.left, .right {
-  flex: 1; /* Делит экран ровно 50/50 */
-  padding: 24px 32px;
-  display: flex;
-  flex-direction: column;
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
-.left {
-  background-color: #ffffff;
-}
-
-.right {
-  background-color: #fcfdfe;
-  border-left: 2px solid #e9ecef;
-}
-
-h2 {
-  font-size: 1.4rem;
-  font-weight: 600;
-  margin-bottom: 24px;
-  color: #1a1a1a;
-  text-align: center;
-  letter-spacing: -0.5px;
-}
-
-/* --- Настройки списков --- */
-.dreams ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 14px; /* Расстояние между карточками */
-}
-
-/* ==========================================
-   ЛЕВАЯ КОЛОНКА (Сырые мысли - Фиолетовые)
-   ========================================== */
-.left ul li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: linear-gradient(135deg, #6a38f1, #5225c1); /* Фиолетовый градиент */
-  color: white;
-  padding: 14px 18px;
-  border-radius: 10px;
-  font-weight: 500;
-  box-shadow: 0 4px 10px rgba(106, 56, 241, 0.15);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.left ul li:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 14px rgba(106, 56, 241, 0.25);
-}
-
-/* Красная кнопка «Удалить» */
-.left ul li button {
-  background-color: #d90429;
-  color: white;
+/* Кнопки */
+.btn {
+  padding: 8px 12px;
   border: none;
-  padding: 8px 14px;
   border-radius: 6px;
   cursor: pointer;
   font-weight: 600;
-  font-size: 0.85rem;
-  transition: background-color 0.2s, transform 0.1s;
+  transition: 0.2s;
 }
 
-.left ul li button:hover {
-  background-color: #ef233c;
-  transform: scale(1.03);
-}
+.btn-del { background: #fee2e2; color: #b91c1c; }
+.btn-voice { background: #e5e7eb; color: #374151; }
+.btn-send { background: #6366f1; color: #ffffff !important; } /* Исправлено: белый цвет */
+.btn:hover { opacity: 0.8; }
 
-/* --- Нижняя панель ввода (Последний li в левом списке) --- */
-.left ul li:last-child {
-  background: #f1f3f8;
-  padding: 10px;
-  border-radius: 12px;
-  box-shadow: none;
-  color: #333;
+/* Поле ввода */
+.input-group {
   display: flex;
   gap: 8px;
+  padding: 10px 0;
+  border-top: 1px solid #eee;
   margin-top: 10px;
 }
-
-.left ul li:last-child:hover {
-  transform: none; /* Отключаем прыжок при наведении для поля ввода */
-}
-
-/* Кнопки «Голос» и «Отправить» */
-.left ul li:last-child button {
-  background-color: #2ec4b6; /* Приятный зеленый акцент */
-  color: white;
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-size: 0.9rem;
-}
-
-.left ul li:last-child button:hover {
-  background-color: #259f93;
-}
-
-/* Поле ввода (input) */
-.left ul li:last-child input {
+.input-field {
   flex: 1;
-  border: 1px solid transparent;
-  padding: 10px 14px;
-  border-radius: 8px;
-  outline: none;
-  font-size: 0.95rem;
-  background: white;
-  transition: border-color 0.2s;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
 }
 
-.left ul li:last-child input:focus {
-  border-color: #6a38f1;
-}
-
-/* ==========================================
-   ПРАВАЯ КОЛОНКА (Структура - Бежевые карточки)
-   ========================================== */
-.right ul li {
-  background-color: #fceade; /* Тот самый теплый бежевый с картинки */
-  color: #2b2d42;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-  line-height: 1.6;
-  font-size: 0.95rem;
-  border-left: 5px solid #f4a261; /* Оранжевая акцентная полоска слева */
-}
-  /* --- Обертка для кнопки на границе колонок --- */
+/* Кнопка Магии - M */
 .magic-divider {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  width: 0; /* Нулевая ширина, чтобы кнопка легла ровно на границу */
-  position: relative;
-  z-index: 10;
-}
-
-/* --- Сама магическая кнопка --- */
-.magic-btn {
-  /* Позиционирование: сдвигаем чуть вниз, чтобы было между заголовком и списком */
-  margin-top: 65px; 
-  
-  /* Размеры и форма */
-  width: 54px;
-  height: 54px;
-  border-radius: 14px;
-  
-  /* Цвета и градиент (как на рисунке: фиолетовый фон, оранжевый текст) */
-  background: linear-gradient(135deg, #4a00e0, #8e2de2);
-  color: #ff9e00;
-  border: 3px solid #ffffff;
-  
-  /* Шрифт */
-  font-size: 1.8rem;
-  font-weight: 800;
-  font-family: 'Arial Black', sans-serif;
-  letter-spacing: -1px;
-  
-  /* Тень и анимация */
-  box-shadow: 0 6px 16px rgba(142, 45, 226, 0.35);
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  
-  /* Центрирование буквы */
   display: flex;
   align-items: center;
   justify-content: center;
+  padding-top: 50px;
+}
+.magic-btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: none;
+  background: #6366f1;
+  color: white !important; /* Исправлено: принудительно белый текст */
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(99, 102, 241, 0.4);
 }
 
-/* --- Эффект при наведении (Магия!) --- */
-.magic-btn:hover {
-  transform: scale(1.15) rotate(6deg); /* Увеличивается и игриво наклоняется */
-  box-shadow: 0 8px 25px rgba(142, 45, 226, 0.6);
-  color: #ffb703; /* Буква М становится ярче */
-  background: linear-gradient(135deg, #5911ea, #9b3cf0);
+/* Списки */
+ul { list-style: none; }
+li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-/* Эффект при нажатии */
-.magic-btn:active {
-  transform: scale(0.95);
+/* Адаптив */
+@media (max-width: 768px) {
+  .container { grid-template-columns: 1fr; }
+  .magic-divider { padding: 20px 0; }
 }
 </style>
