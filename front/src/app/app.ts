@@ -3,7 +3,21 @@ import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgZone } from '@angular/core';
+import { Pipe, PipeTransform } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
+@Pipe({
+  name: 'safeHtml',
+  standalone: true // Это важно для Standalone-компонентов
+})
+export class SafeHtmlPipe implements PipeTransform {
+  constructor(private sanitizer: DomSanitizer) {}
+
+  transform(value: string): SafeHtml {
+    // Метод bypassSecurityTrustHtml разрешает вставку HTML
+    return this.sanitizer.bypassSecurityTrustHtml(value);
+  }
+}
 @Component({
   selector: 'app-root',
   standalone: true,
